@@ -1,11 +1,23 @@
+import { useState } from 'react';
 import { ExamHeader } from '@/components/ExamHeader';
 import { ResultHeader } from '@/components/ResultHeader';
 import { TopicAnalysis } from '@/components/TopicAnalysis';
 import { SubtopicAnalysis } from '@/components/SubtopicAnalysis';
 import { WrongQuestionsTable } from '@/components/WrongQuestionsTable';
 import { Button } from '@/components/ui/button';
-import { Home, RotateCcw } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Home, RotateCcw, ChevronDown, AlertTriangle } from 'lucide-react';
 import type { ExamResult, Exam } from '@/types/exam';
+
+interface WeakSubtopic {
+  key: string;
+  tema: string;
+  subtema: string;
+  correct: number;
+  total: number;
+  percentage: number;
+}
 
 interface ResultViewProps {
   exam: Exam;
@@ -15,6 +27,20 @@ interface ResultViewProps {
 }
 
 export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps) => {
+  const [openTopics, setOpenTopics] = useState(false);
+  const [openSubtopics, setOpenSubtopics] = useState(false);
+
+  // Calcular os 5 subtemas com pior desempenho
+  const weakSubtopics: WeakSubtopic[] = Object.entries(result.subtopicScores)
+    .map(([key, scores]) => ({
+      key,
+      ...scores,
+      percentage: Math.round((scores.correct / scores.total) * 100)
+    }))
+    .filter(s => s.percentage < 70)
+    .sort((a, b) => a.percentage - b.percentage)
+    .slice(0, 5);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <ExamHeader />
@@ -53,17 +79,94 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
 
         {/* Análises */}
         <div className="space-y-8">
+          {/* Questões Erradas - Prioridade */}
           <div className="animate-in fade-in duration-500" style={{ animationDelay: '100ms' }}>
-            <TopicAnalysis topicScores={result.topicScores} />
-          </div>
-
-          <div className="animate-in fade-in duration-500" style={{ animationDelay: '200ms' }}>
-            <SubtopicAnalysis subtopicScores={result.subtopicScores} />
-          </div>
-
-          <div className="animate-in fade-in duration-500" style={{ animationDelay: '300ms' }}>
             <WrongQuestionsTable wrongQuestions={result.wrongQuestions} />
           </div>
+
+          {/* Top Assuntos para Focar */}
+          {weakSubtopics.length > 0 && (
+            <Card className="bg-gradient-to-r from-warning-light to-orange-50 border-2 border-warning shadow-xl animate-in fade-in duration-500" style={{ animationDelay: '200ms' }}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-warning-foreground">
+                  <AlertTriangle className="w-6 h-6" />
+                  Onde Você Precisa Focar
+                </CardTitle>
+                <p className="text-sm text-warning-foreground/90">📚 Estude estes assuntos para aumentar sua nota:</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {weakSubtopics.map((st, idx) => (
+                  <div key={st.key} className="bg-card rounded-lg p-4 shadow-sm border border-border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className={`w-8 h-8 rounded-full ${st.percentage < 50 ? 'bg-destructive' : 'bg-warning'} text-white font-bold flex items-center justify-center text-sm`}>
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <p className="font-bold text-card-foreground">{st.subtema}</p>
+                          <p className="text-xs text-muted-foreground">{st.tema}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-2xl font-bold ${st.percentage < 50 ? 'text-destructive' : 'text-warning-foreground'}`}>
+                          {st.percentage}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">{st.correct}/{st.total}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Análise Detalhada - Seções Expansíveis */}
+          <Card className="shadow-xl animate-in fade-in duration-500" style={{ animationDelay: '300ms' }}>
+            <CardHeader>
+              <CardTitle>📊 Análise Detalhada</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {/* Análise por Tema - Expansível */}
+              <Collapsible open={openTopics} onOpenChange={setOpenTopics}>
+                <div className="border-b border-border">
+                  <CollapsibleTrigger className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span className="text-lg">📚</span>
+                      </div>
+                      <span className="font-bold text-lg text-card-foreground">Ver Análise por Tema Principal</span>
+                    </div>
+                    <ChevronDown className={`w-6 h-6 text-muted-foreground transition-transform ${openTopics ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="px-6 pb-6">
+                      <TopicAnalysis topicScores={result.topicScores} />
+                    </div>
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+
+              {/* Análise por Subtema - Expansível */}
+              <Collapsible open={openSubtopics} onOpenChange={setOpenSubtopics}>
+                <div className="border-b border-border">
+                  <CollapsibleTrigger className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span className="text-lg">📋</span>
+                      </div>
+                      <span className="font-bold text-lg text-card-foreground">Ver Todos os Subtemas Detalhados</span>
+                    </div>
+                    <ChevronDown className={`w-6 h-6 text-muted-foreground transition-transform ${openSubtopics ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="px-6 pb-6">
+                      <SubtopicAnalysis subtopicScores={result.subtopicScores} />
+                    </div>
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Dicas finais */}
