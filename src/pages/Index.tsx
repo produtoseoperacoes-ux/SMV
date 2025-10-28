@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Home } from './Home';
 import { ExamView } from './ExamView';
 import { ResultView } from './ResultView';
-import { ANSWER_KEY, QUESTION_TOPICS, OFFICIAL_EXAMS, PRACTICE_EXAMS } from '@/data/examData';
+import { getAnswerKeyByExamId, getTopicsByExamId, OFFICIAL_EXAMS, PRACTICE_EXAMS } from '@/data/examData';
 import type { Exam, UserAnswers, Answer, ExamResult, SavedDraft } from '@/types/exam';
 
 type View = 'home' | 'exam' | 'result';
@@ -46,6 +46,11 @@ const Index = () => {
   const finishExam = () => {
     if (!selectedExam) return;
 
+    const answerKey = getAnswerKeyByExamId(selectedExam.id);
+    const topics = getTopicsByExamId(selectedExam.id);
+    
+    if (!answerKey || !topics) return;
+
     let correct = 0;
     let wrong = 0;
     const topicScores: { [topic: string]: { correct: number; total: number } } = {};
@@ -54,8 +59,8 @@ const Index = () => {
 
     for (let i = 1; i <= selectedExam.totalQuestions; i++) {
       const userAnswer = userAnswers[i];
-      const correctAnswer = ANSWER_KEY[i];
-      const topicData = QUESTION_TOPICS[i] || { tema: 'Português - Geral', subtema: 'Diversos' };
+      const correctAnswer = answerKey[i];
+      const topicData = topics[i] || { tema: 'Português - Geral', subtema: 'Diversos' };
       const tema = topicData.tema;
       const subtema = topicData.subtema;
 

@@ -1,4 +1,6 @@
 import type { Answer, QuestionTopic, Exam } from '@/types/exam';
+import { SIMULADO_07_ANSWER_KEY, SIMULADO_07_TOPICS } from './simulado07Data';
+import { SIMULADO_08_ANSWER_KEY, SIMULADO_08_TOPICS } from './simulado08Data';
 
 export const ANSWER_KEY: { [key: number]: Answer } = {
   1:'B', 2:'B', 3:'C', 4:'B', 5:'B', 6:'B', 7:'E', 8:'E', 9:'B', 10:'E',
@@ -61,6 +63,30 @@ export const QUESTION_TOPICS: { [key: number]: QuestionTopic } = {
   50: { tema: 'Português - Morfologia', subtema: 'Acentuação Gráfica' }
 };
 
+// Função auxiliar para obter gabarito por ID do exame
+export function getAnswerKeyByExamId(examId: string): { [key: number]: Answer } | null {
+  switch(examId) {
+    case 'simulado-07':
+      return SIMULADO_07_ANSWER_KEY;
+    case 'simulado-08':
+      return SIMULADO_08_ANSWER_KEY;
+    default:
+      return ANSWER_KEY;
+  }
+}
+
+// Função auxiliar para obter tópicos por ID do exame
+export function getTopicsByExamId(examId: string): { [key: number]: QuestionTopic } | null {
+  switch(examId) {
+    case 'simulado-07':
+      return SIMULADO_07_TOPICS;
+    case 'simulado-08':
+      return SIMULADO_08_TOPICS;
+    default:
+      return QUESTION_TOPICS;
+  }
+}
+
 // PROVAS OFICIAIS
 export const OFFICIAL_EXAMS: Exam[] = [
   {
@@ -99,7 +125,7 @@ export const OFFICIAL_EXAMS: Exam[] = [
 export const PRACTICE_EXAMS: Exam[] = [
   {
     id: 'simulado-01',
-    title: 'Simulado Geral 01',
+    title: 'Simulado 01 - Português SMV',
     subject: 'Português',
     totalQuestions: 40,
     year: 2025,
@@ -109,9 +135,9 @@ export const PRACTICE_EXAMS: Exam[] = [
   },
   {
     id: 'simulado-02',
-    title: 'Simulado Intensivo 02',
+    title: 'Simulado 02 - Português SMV',
     subject: 'Português',
-    totalQuestions: 50,
+    totalQuestions: 40,
     year: 2025,
     description: 'Questões avançadas de bancas federais',
     difficulty: 'Difícil',
@@ -119,9 +145,9 @@ export const PRACTICE_EXAMS: Exam[] = [
   },
   {
     id: 'simulado-03',
-    title: 'Simulado Morfologia',
+    title: 'Simulado 03 - Português SMV',
     subject: 'Português',
-    totalQuestions: 30,
+    totalQuestions: 40,
     year: 2025,
     description: 'Focado em questões de morfologia',
     difficulty: 'Fácil',
@@ -129,12 +155,52 @@ export const PRACTICE_EXAMS: Exam[] = [
   },
   {
     id: 'simulado-04',
-    title: 'Simulado Sintaxe',
+    title: 'Simulado 04 - Português SMV',
     subject: 'Português',
-    totalQuestions: 30,
+    totalQuestions: 40,
     year: 2025,
     description: 'Focado em questões de sintaxe',
     difficulty: 'Média',
     topics: 'Sintaxe exclusivo'
+  },
+  {
+    id: 'simulado-05',
+    title: 'Simulado 05 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Simulado abrangente - Nível intermediário',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-06',
+    title: 'Simulado 06 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Simulado completo - Nível avançado',
+    difficulty: 'Difícil',
+    topics: 'Todos os temas'
+  },
+  {
+    id: 'simulado-07',
+    title: 'Simulado 07 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Simulado focado em interpretação e coesão textual',
+    difficulty: 'Média',
+    topics: 'Interpretação, Coesão e Sintaxe'
+  },
+  {
+    id: 'simulado-08',
+    title: 'Simulado 08 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Simulado completo com ênfase em ética e linguagem',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
   }
 ];
