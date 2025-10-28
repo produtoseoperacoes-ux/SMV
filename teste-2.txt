@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Provas - Classificação Detalhada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .answer-btn.selected {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            transform: scale(1.05);
+        }
+        .question-card {
+            transition: all 0.2s ease;
+        }
+        .question-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 scroll-smooth">
+
+    <div id="app"></div>
+
+    <script>
+        // ==================== DADOS DO SISTEMA ====================
+        
+        const ANSWER_KEY = {
+            1:'B', 2:'B', 3:'C', 4:'B', 5:'B', 6:'B', 7:'E', 8:'E', 9:'B', 10:'E',
+            11:'E', 12:'X', 13:'C', 14:'A', 15:'D', 16:'C', 17:'C', 18:'C', 19:'B', 20:'E',
+            21:'A', 22:'A', 23:'C', 24:'D', 25:'E', 26:'B', 27:'E', 28:'B', 29:'D', 30:'D',
+            31:'D', 32:'C', 33:'A', 34:'X', 35:'E', 36:'C', 37:'D', 38:'B', 39:'C', 40:'A',
+            41:'C', 42:'A', 43:'B', 44:'B', 45:'C', 46:'A', 47:'E', 48:'E', 49:'E', 50:'A'
+        };
+
+        const QUESTION_TOPICS = {
+            1: { tema: 'Português - Morfologia', subtema: 'Acentuação Gráfica' },
+            2: { tema: 'Português - Morfologia', subtema: 'Acentuação Gráfica' },
+            3: { tema: 'Português - Sintaxe', subtema: 'Coerência Textual' },
+            4: { tema: 'Português - Morfologia', subtema: 'Colocação Pronominal' },
+            5: { tema: 'Português - Sintaxe', subtema: 'Função Sintática' },
+            6: { tema: 'Português - Morfologia', subtema: 'Pronomes' },
+            7: { tema: 'Interpretação de Texto', subtema: 'Inferência' },
+            8: { tema: 'Interpretação de Texto', subtema: 'Compreensão Global' },
+            9: { tema: 'Português - Sintaxe', subtema: 'Concordância Verbal' },
+            10: { tema: 'Português - Morfologia', subtema: 'Classes de Palavras' },
+            11: { tema: 'Português - Sintaxe', subtema: 'Regência Verbal' },
+            12: { tema: 'Interpretação de Texto', subtema: 'Análise Crítica' },
+            13: { tema: 'Português - Morfologia', subtema: 'Ortografia' },
+            14: { tema: 'Português - Sintaxe', subtema: 'Período Composto' },
+            15: { tema: 'Interpretação de Texto', subtema: 'Coesão Textual' },
+            16: { tema: 'Português - Sintaxe', subtema: 'Concordância Nominal' },
+            17: { tema: 'Português - Morfologia', subtema: 'Verbos - Tempos e Modos' },
+            18: { tema: 'Português - Sintaxe', subtema: 'Regência Nominal' },
+            19: { tema: 'Interpretação de Texto', subtema: 'Tipologia Textual' },
+            20: { tema: 'Português - Morfologia', subtema: 'Substantivos' },
+            21: { tema: 'Português - Sintaxe', subtema: 'Crase' },
+            22: { tema: 'Português - Morfologia', subtema: 'Adjetivos' },
+            23: { tema: 'Interpretação de Texto', subtema: 'Figuras de Linguagem' },
+            24: { tema: 'Português - Sintaxe', subtema: 'Pontuação' },
+            25: { tema: 'Português - Morfologia', subtema: 'Advérbios' },
+            26: { tema: 'Português - Sintaxe', subtema: 'Orações Subordinadas' },
+            27: { tema: 'Interpretação de Texto', subtema: 'Ambiguidade' },
+            28: { tema: 'Português - Morfologia', subtema: 'Preposições' },
+            29: { tema: 'Português - Sintaxe', subtema: 'Orações Coordenadas' },
+            30: { tema: 'Português - Morfologia', subtema: 'Conjunções' },
+            31: { tema: 'Interpretação de Texto', subtema: 'Elementos de Referência' },
+            32: { tema: 'Português - Sintaxe', subtema: 'Vocativo e Aposto' },
+            33: { tema: 'Português - Morfologia', subtema: 'Formação de Palavras' },
+            34: { tema: 'Interpretação de Texto', subtema: 'Gêneros Textuais' },
+            35: { tema: 'Português - Sintaxe', subtema: 'Vozes Verbais' },
+            36: { tema: 'Português - Morfologia', subtema: 'Artigos' },
+            37: { tema: 'Português - Sintaxe', subtema: 'Complementos Verbais' },
+            38: { tema: 'Interpretação de Texto', subtema: 'Intertextualidade' },
+            39: { tema: 'Português - Morfologia', subtema: 'Numerais' },
+            40: { tema: 'Português - Sintaxe', subtema: 'Adjunto Adverbial' },
+            41: { tema: 'Português - Morfologia', subtema: 'Colocação Pronominal' },
+            42: { tema: 'Interpretação de Texto', subtema: 'Pressuposição' },
+            43: { tema: 'Português - Sintaxe', subtema: 'Predicado' },
+            44: { tema: 'Português - Morfologia', subtema: 'Pronomes Relativos' },
+            45: { tema: 'Português - Sintaxe', subtema: 'Complemento Nominal' },
+            46: { tema: 'Interpretação de Texto', subtema: 'Argumentação' },
+            47: { tema: 'Português - Morfologia', subtema: 'Interjeições' },
+            48: { tema: 'Português - Sintaxe', subtema: 'Transitividade Verbal' },
+            49: { tema: 'Interpretação de Texto', subtema: 'Ironia e Sarcasmo' },
+            50: { tema: 'Português - Morfologia', subtema: 'Acentuação Gráfica' }
+        };
+
+        // PROVAS OFICIAIS
+        const OFFICIAL_EXAMS = [
+            {
+                id: 'petrobras-2023',
+                title: 'Petrobras 2023',
+                subject: 'Português',
+                totalQuestions: 50,
+                year: 2023,
+                banca: 'Cesgranrio',
+                description: 'Prova oficial Petrobras - Engenheiro de Produção',
+                difficulty: 'Difícil'
+            },
+            {
+                id: 'transpetro-2023',
+                title: 'Transpetro 2023',
+                subject: 'Português',
+                totalQuestions: 40,
+                year: 2023,
+                banca: 'Cesgranrio',
+                description: 'Prova oficial Transpetro - Engenheiro Júnior',
+                difficulty: 'Média'
+            },
+            {
+                id: 'eletrobras-2022',
+                title: 'Eletrobras 2022',
+                subject: 'Português',
+                totalQuestions: 35,
+                year: 2022,
+                banca: 'Cesgranrio',
+                description: 'Prova oficial Eletrobras - Analista',
+                difficulty: 'Média'
+            }
+        ];
+
+        // SIMULADOS
+        const PRACTICE_EXAMS = [
+            {
+                id: 'simulado-01',
+                title: 'Simulado Geral 01',
+                subject: 'Português',
+                totalQuestions: 40,
+                year: 2025,
+                description: 'Questões de diversas bancas - Nível médio',
+                difficulty: 'Média',
+                topics: 'Morfologia, Sintaxe e Interpretação'
+            },
+            {
+                id: 'simulado-02',
+                title: 'Simulado Intensivo 02',
+                subject: 'Português',
+                totalQuestions: 50,
+                year: 2025,
+                description: 'Questões avançadas de bancas federais',
+                difficulty: 'Difícil',
+                topics: 'Todos os temas'
+            },
+            {
+                id: 'simulado-03',
+                title: 'Simulado Morfologia',
+                subject: 'Português',
+                totalQuestions: 30,
+                year: 2025,
+                description: 'Focado em questões de morfologia',
+                difficulty: 'Fácil',
+                topics: 'Morfologia exclusivo'
+            },
+            {
+                id: 'simulado-04',
+                title: 'Simulado Sintaxe',
+                subject: 'Português',
+                totalQuestions: 30,
+                year: 2025,
+                description: 'Focado em questões de sintaxe',
+                difficulty: 'Média',
+                topics: 'Sintaxe exclusivo'
+            }
+        ];
+
+        // Estado da aplicação
+        let state = {
+            currentView: 'home',
+            selectedExam: null,
+            userAnswers: {},
+            result: null,
+            savedDrafts: {},
+            selectedOfficialExam: '',
+            selectedPracticeExam: ''
+        };
+
+        // ==================== FUNÇÕES DO SISTEMA ====================
+        
+        function setState(newState) {
+            state = { ...state, ...newState };
+            render();
+        }
+
+        function selectOfficialExam(examId) {
+            state.selectedOfficialExam = examId;
+            render();
+        }
+
+        function selectPracticeExam(examId) {
+            state.selectedPracticeExam = examId;
+            render();
+        }
+
+        function selectAnswer(questionNum, answer) {
+            state.userAnswers[questionNum] = answer;
+            render();
+        }
+
+        function startExam(exam) {
+            setState({
+                selectedExam: exam,
+                userAnswers: state.savedDrafts[exam.id]?.answers || {},
+                result: null,
+                currentView: 'exam'
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveDraft() {
+            const answeredCount = Object.keys(state.userAnswers).length;
+            state.savedDrafts[state.selectedExam.id] = {
+                answers: { ...state.userAnswers },
+                date: new Date().toLocaleString('pt-BR'),
+                count: answeredCount
+            };
+            alert(`✅ Rascunho salvo com sucesso!\n\n${answeredCount} questões respondidas.\n\nVocê pode voltar mais tarde para continuar de onde parou.`);
+        }
+
+        function finishExam() {
+            const answeredCount = Object.keys(state.userAnswers).length;
+            const totalQuestions = state.selectedExam.totalQuestions;
+
+            if (answeredCount < totalQuestions) {
+                const confirmed = confirm(
+                    `⚠️ ATENÇÃO\n\nVocê respondeu apenas ${answeredCount} de ${totalQuestions} questões.\n\n` +
+                    'Questões em branco serão consideradas ERRADAS.\n\n' +
+                    'Deseja finalizar mesmo assim?'
+                );
+                if (!confirmed) return;
+            }
+
+            calculateResult();
+        }
+
+        function calculateResult() {
+            let correct = 0;
+            let wrong = 0;
+            const topicScores = {};
+            const subtopicScores = {};
+            const wrongQuestions = [];
+
+            for (let i = 1; i <= state.selectedExam.totalQuestions; i++) {
+                const userAnswer = state.userAnswers[i];
+                const correctAnswer = ANSWER_KEY[i];
+                const topicData = QUESTION_TOPICS[i] || { tema: 'Português - Geral', subtema: 'Diversos' };
+                const tema = topicData.tema;
+                const subtema = topicData.subtema;
+
+                if (!topicScores[tema]) {
+                    topicScores[tema] = { correct: 0, total: 0 };
+                }
+                topicScores[tema].total++;
+
+                const subtopicKey = `${tema} → ${subtema}`;
+                if (!subtopicScores[subtopicKey]) {
+                    subtopicScores[subtopicKey] = { correct: 0, total: 0, tema, subtema };
+                }
+                subtopicScores[subtopicKey].total++;
+
+                if (correctAnswer === 'X') {
+                    correct++;
+                    topicScores[tema].correct++;
+                    subtopicScores[subtopicKey].correct++;
+                } else if (userAnswer === correctAnswer) {
+                    correct++;
+                    topicScores[tema].correct++;
+                    subtopicScores[subtopicKey].correct++;
+                } else {
+                    wrong++;
+                    wrongQuestions.push({
+                        num: i,
+                        tema: tema,
+                        subtema: subtema,
+                        userAnswer: userAnswer || '(em branco)',
+                        correctAnswer: correctAnswer
+                    });
+                }
+            }
+
+            const percentage = Math.round((correct / state.selectedExam.totalQuestions) * 100);
+
+            setState({
+                result: {
+                    correct,
+                    wrong,
+                    total: state.selectedExam.totalQuestions,
+                    percentage,
+                    topicScores,
+                    subtopicScores,
+                    wrongQuestions
+                },
+                currentView: 'result'
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetExam() {
+            setState({
+                userAnswers: {},
+                result: null,
+                currentView: 'exam'
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goHome() {
+            setState({
+                currentView: 'home',
+                selectedExam: null,
+                userAnswers: {},
+                result: null
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToUnanswered() {
+            for (let i = 1; i <= state.selectedExam.totalQuestions; i++) {
+                if (!state.userAnswers[i]) {
+                    const element = document.getElementById('q' + i);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.classList.add('ring-4', 'ring-yellow-400');
+                        setTimeout(() => {
+                            element.classList.remove('ring-4', 'ring-yellow-400');
+                        }, 2000);
+                    }
+                    return;
+                }
+            }
+            alert('🎉 Parabéns! Todas as questões já foram respondidas!');
+        }
+
+        // ==================== RENDERIZAÇÃO ====================
+        
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.currentView === 'home') {
+                app.innerHTML = renderHome();
+            } else if (state.currentView === 'exam') {
+                app.innerHTML = renderExam();
+            } else if (state.currentView === 'result') {
+                app.innerHTML = renderResult();
+            }
+        }
+
+        function renderHome() {
+            const selectedOfficial = OFFICIAL_EXAMS.find(e => e.id === state.selectedOfficialExam);
+            const selectedPractice = PRACTICE_EXAMS.find(e => e.id === state.selectedPracticeExam);
+
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+                    <!-- Header -->
+                    <div class="bg-white shadow-lg border-b-4 border-blue-600">
+                        <div class="max-w-7xl mx-auto px-6 py-8">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl shadow-lg">
+                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h1 class="text-4xl font-bold text-gray-800">Sistema de Provas</h1>
+                                    <p class="text-gray-600 mt-1">Classificação detalhada por <strong>tema e subtema</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="max-w-7xl mx-auto px-6 py-10">
+                        <div class="mb-10 fade-in">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-3">👤 Bem-vindo, Estudante!</h2>
+                            <p class="text-lg text-gray-600">Escolha uma prova oficial ou um simulado:</p>
+                        </div>
+
+                        <!-- Two Sections: Official Exams and Practice Exams -->
+                        <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                            
+                            <!-- PROVAS OFICIAIS -->
+                            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200 fade-in">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-3 rounded-xl">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-800">Provas Oficiais</h3>
+                                        <p class="text-sm text-gray-600">Petrobras, Transpetro, Eletrobras</p>
+                                    </div>
+                                </div>
+
+                                <!-- Dropdown Selector -->
+                                <div class="mb-6">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Selecione a prova oficial:
+                                    </label>
+                                    <select 
+                                        onchange="selectOfficialExam(this.value)"
+                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none font-medium text-gray-700 bg-white"
+                                    >
+                                        <option value="">-- Escolha uma prova --</option>
+                                        ${OFFICIAL_EXAMS.map(exam => `
+                                            <option value="${exam.id}" ${state.selectedOfficialExam === exam.id ? 'selected' : ''}>
+                                                ${exam.title} (${exam.year}) - ${exam.totalQuestions} questões
+                                            </option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+
+                                <!-- Exam Details -->
+                                ${selectedOfficial ? `
+                                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 mb-6">
+                                        <h4 class="font-bold text-lg text-gray-800 mb-3">${selectedOfficial.title}</h4>
+                                        <div class="space-y-2 text-sm text-gray-700">
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                                </svg>
+                                                <strong>Ano:</strong> ${selectedOfficial.year}
+                                            </p>
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                                                </svg>
+                                                <strong>Banca:</strong> ${selectedOfficial.banca}
+                                            </p>
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                                <strong>Questões:</strong> ${selectedOfficial.totalQuestions}
+                                            </p>
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" />
+                                                </svg>
+                                                <strong>Dificuldade:</strong> 
+                                                <span class="px-2 py-1 rounded-full text-xs font-bold ${
+                                                    selectedOfficial.difficulty === 'Difícil' ? 'bg-red-100 text-red-700' :
+                                                    selectedOfficial.difficulty === 'Média' ? 'bg-yellow-100 text-yellow-700' :
+                                                    'bg-green-100 text-green-700'
+                                                }">
+                                                    ${selectedOfficial.difficulty}
+                                                </span>
+                                            </p>
+                                            <p class="text-gray-600 mt-3 italic">${selectedOfficial.description}</p>
+                                        </div>
+
+                                        ${state.savedDrafts[selectedOfficial.id] ? `
+                                            <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-300">
+                                                <p class="text-sm text-yellow-800 font-semibold">
+                                                    💾 Rascunho salvo: ${state.savedDrafts[selectedOfficial.id].count} questões
+                                                </p>
+                                                <p class="text-xs text-yellow-700">${state.savedDrafts[selectedOfficial.id].date}</p>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+
+                                    <button
+                                        onclick="startExam(${JSON.stringify(selectedOfficial).replace(/"/g, '&quot;')})"
+                                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                    >
+                                        ${state.savedDrafts[selectedOfficial.id] ? '▶️ Continuar Prova' : '🚀 Iniciar Prova'}
+                                    </button>
+                                ` : `
+                                    <div class="bg-gray-50 rounded-xl p-12 text-center border-2 border-dashed border-gray-300">
+                                        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        <p class="text-gray-500 font-medium">Selecione uma prova no menu acima</p>
+                                    </div>
+                                `}
+                            </div>
+
+                            <!-- SIMULADOS -->
+                            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-green-200 fade-in">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="bg-gradient-to-br from-green-600 to-green-700 p-3 rounded-xl">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-800">Simulados</h3>
+                                        <p class="text-sm text-gray-600">Questões diversas para treinar</p>
+                                    </div>
+                                </div>
+
+                                <!-- Dropdown Selector -->
+                                <div class="mb-6">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Selecione o simulado:
+                                    </label>
+                                    <select 
+                                        onchange="selectPracticeExam(this.value)"
+                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:outline-none font-medium text-gray-700 bg-white"
+                                    >
+                                        <option value="">-- Escolha um simulado --</option>
+                                        ${PRACTICE_EXAMS.map(exam => `
+                                            <option value="${exam.id}" ${state.selectedPracticeExam === exam.id ? 'selected' : ''}>
+                                                ${exam.title} - ${exam.totalQuestions} questões
+                                            </option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+
+                                <!-- Exam Details -->
+                                ${selectedPractice ? `
+                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 mb-6">
+                                        <h4 class="font-bold text-lg text-gray-800 mb-3">${selectedPractice.title}</h4>
+                                        <div class="space-y-2 text-sm text-gray-700">
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                                                </svg>
+                                                <strong>Tópicos:</strong> ${selectedPractice.topics}
+                                            </p>
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                                <strong>Questões:</strong> ${selectedPractice.totalQuestions}
+                                            </p>
+                                            <p class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" />
+                                                </svg>
+                                                <strong>Dificuldade:</strong> 
+                                                <span class="px-2 py-1 rounded-full text-xs font-bold ${
+                                                    selectedPractice.difficulty === 'Difícil' ? 'bg-red-100 text-red-700' :
+                                                    selectedPractice.difficulty === 'Média' ? 'bg-yellow-100 text-yellow-700' :
+                                                    'bg-green-100 text-green-700'
+                                                }">
+                                                    ${selectedPractice.difficulty}
+                                                </span>
+                                            </p>
+                                            <p class="text-gray-600 mt-3 italic">${selectedPractice.description}</p>
+                                        </div>
+
+                                        ${state.savedDrafts[selectedPractice.id] ? `
+                                            <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-300">
+                                                <p class="text-sm text-yellow-800 font-semibold">
+                                                    💾 Rascunho salvo: ${state.savedDrafts[selectedPractice.id].count} questões
+                                                </p>
+                                                <p class="text-xs text-yellow-700">${state.savedDrafts[selectedPractice.id].date}</p>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+
+                                    <button
+                                        onclick="startExam(${JSON.stringify(selectedPractice).replace(/"/g, '&quot;')})"
+                                        class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                    >
+                                        ${state.savedDrafts[selectedPractice.id] ? '▶️ Continuar Simulado' : '🚀 Iniciar Simulado'}
+                                    </button>
+                                ` : `
+                                    <div class="bg-gray-50 rounded-xl p-12 text-center border-2 border-dashed border-gray-300">
+                                        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        <p class="text-gray-500 font-medium">Selecione um simulado no menu acima</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-8 shadow-lg fade-in">
+                            <h3 class="font-bold text-2xl text-blue-900 mb-4 flex items-center gap-3">
+                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                                </svg>
+                                Como Funciona o Sistema
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4 text-blue-800">
+                                <div class="flex gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center font-bold">1</div>
+                                    <p class="text-sm">Escolha entre <strong>Provas Oficiais</strong> ou <strong>Simulados</strong></p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center font-bold">2</div>
+                                    <p class="text-sm">Selecione a prova desejada no <strong>menu suspenso</strong></p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center font-bold">3</div>
+                                    <p class="text-sm">Marque suas respostas e salve rascunhos quando quiser</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center font-bold">4</div>
+                                    <p class="text-sm">Receba análise <strong>detalhada por subtema</strong> ao finalizar</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center font-bold">5</div>
+                                    <p class="text-sm">Identifique <strong>exatamente</strong> onde precisa estudar mais</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center font-bold">6</div>
+                                    <p class="text-sm">Acompanhe sua evolução ao longo do tempo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderExam() {
+            const answeredCount = Object.keys(state.userAnswers).length;
+            const progress = Math.round((answeredCount / state.selectedExam.totalQuestions) * 100);
+
+            return `
+                <div class="min-h-screen bg-gray-50">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl">
+                        <div class="max-w-7xl mx-auto px-6 py-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h1 class="text-3xl font-bold mb-1">${state.selectedExam.title}</h1>
+                                    <p class="text-blue-100">${state.selectedExam.subject} - ${state.selectedExam.totalQuestions} questões</p>
+                                </div>
+                                <div class="text-right bg-white/20 px-6 py-4 rounded-xl backdrop-blur-sm">
+                                    <p class="text-sm text-blue-100 mb-1">Progresso</p>
+                                    <p class="text-4xl font-bold">${answeredCount}/${state.selectedExam.totalQuestions}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="bg-white shadow-lg">
+                        <div class="max-w-7xl mx-auto px-6 py-4">
+                            <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                                <div class="progress-bar bg-gradient-to-r from-blue-600 to-indigo-600 h-4 rounded-full" style="width: ${progress}%"></div>
+                            </div>
+                            <p class="text-sm text-gray-600 font-medium">
+                                ${answeredCount === 0 ? '📝 Nenhuma questão respondida ainda - Comece agora!' :
+                                  answeredCount === state.selectedExam.totalQuestions ? '🎉 Todas as questões respondidas! Clique em Finalizar.' :
+                                  `${answeredCount} de ${state.selectedExam.totalQuestions} questões respondidas (${progress}%)`}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="max-w-7xl mx-auto px-6 py-8">
+                        <div class="grid lg:grid-cols-2 gap-8">
+                            
+                            <!-- PDF Viewer -->
+                            <div class="bg-white rounded-2xl shadow-xl p-6 h-fit sticky top-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                        <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                                        </svg>
+                                        Prova Original
+                                    </h2>
+                                </div>
+                                
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-12 bg-gray-50 min-h-[500px] flex flex-col items-center justify-center">
+                                    <svg class="w-32 h-32 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-gray-600 font-semibold text-lg mb-2">Visualizador de PDF</p>
+                                    <p class="text-sm text-gray-500 text-center">Em produção: O PDF da prova seria exibido aqui</p>
+                                    <p class="text-xs text-gray-400 mt-2">Página 1 de 15</p>
+                                </div>
+
+                                <div class="mt-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
+                                    <p class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                        </svg>
+                                        Exemplo de questão da prova:
+                                    </p>
+                                    <p class="text-sm text-gray-700 mb-3">
+                                        <strong>Questão 01</strong> - Em que opção a palavra destacada é acentuada por regra distinta do vocábulo sublinhado na sentença...
+                                    </p>
+                                    <div class="space-y-1 text-sm text-gray-600 pl-4">
+                                        <p>(A) história</p>
+                                        <p>(B) memória</p>
+                                        <p>(C) científica</p>
+                                        <p>(D) fenômeno</p>
+                                        <p>(E) século</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Answer Sheet -->
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                        <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                        Gabarito Digital
+                                    </h2>
+                                    <button 
+                                        onclick="scrollToUnanswered()"
+                                        class="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 text-sm font-semibold transition-all"
+                                    >
+                                        🔍 Próxima sem resposta
+                                    </button>
+                                </div>
+                                
+                                <div class="space-y-4 max-h-[700px] overflow-y-auto pr-2 pb-4">
+                                    ${Array.from({ length: state.selectedExam.totalQuestions }, (_, i) => i + 1).map(num => {
+                                        const isAnnulled = ANSWER_KEY[num] === 'X';
+                                        const topicData = QUESTION_TOPICS[num] || { tema: 'Português', subtema: 'Geral' };
+                                        
+                                        return `
+                                            <div 
+                                                id="q${num}"
+                                                class="question-card border-2 border-gray-200 rounded-xl p-5 hover:border-blue-300 transition-all bg-white"
+                                            >
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <span class="font-bold text-lg text-gray-800">Questão ${num}</span>
+                                                    <div class="flex flex-col items-end gap-1">
+                                                        ${isAnnulled ? '<span class="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">Anulada</span>' : ''}
+                                                        <span class="text-xs text-gray-600 font-semibold bg-gray-100 px-2 py-1 rounded">${topicData.tema}</span>
+                                                        <span class="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded">${topicData.subtema}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex gap-2 flex-wrap">
+                                                    ${['A', 'B', 'C', 'D', 'E'].map(opt => `
+                                                        <button
+                                                            onclick="selectAnswer(${num}, '${opt}')"
+                                                            class="answer-btn px-5 py-3 rounded-lg font-bold transition-all text-lg ${
+                                                                state.userAnswers[num] === opt
+                                                                    ? 'selected shadow-lg'
+                                                                    : 'border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+                                                            }"
+                                                        >
+                                                            ${opt}
+                                                        </button>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-6 flex gap-4 border-t-2 border-gray-200 pt-6">
+                                    <button
+                                        onclick="saveDraft()"
+                                        class="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold text-lg transition-all"
+                                    >
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                                        </svg>
+                                        Salvar
+                                    </button>
+                                    <button
+                                        onclick="finishExam()"
+                                        class="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-bold text-lg transition-all shadow-lg hover:shadow-xl"
+                                    >
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                        </svg>
+                                        Finalizar e Corrigir
+                                    </button>
+                                </div>
+
+                                <button 
+                                    onclick="goHome()"
+                                    class="w-full mt-4 px-4 py-3 text-gray-600 hover:text-gray-800 text-base font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 rounded-lg transition-all"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Voltar para início
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderResult() {
+            const weakSubtopics = Object.entries(state.result.subtopicScores)
+                .map(([key, scores]) => ({
+                    key,
+                    ...scores,
+                    percentage: Math.round((scores.correct / scores.total) * 100)
+                }))
+                .filter(s => s.percentage < 70)
+                .sort((a, b) => a.percentage - b.percentage)
+                .slice(0, 5);
+
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-10">
+                    <div class="max-w-6xl mx-auto px-6">
+                        
+                        <!-- Header -->
+                        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8 fade-in border-t-4 border-blue-600">
+                            <h1 class="text-4xl font-bold text-gray-800 mb-3 flex items-center gap-3">
+                                <svg class="w-10 h-10 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                                </svg>
+                                Resultado da ${state.selectedExam.title}
+                            </h1>
+                            <p class="text-xl text-gray-600">${state.selectedExam.subject} - ${state.selectedExam.totalQuestions} questões</p>
+                            <p class="text-sm text-gray-500 mt-2 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                </svg>
+                                Realizada em ${new Date().toLocaleString('pt-BR')}
+                            </p>
+                        </div>
+
+                        <!-- Score Card -->
+                        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-2xl p-10 mb-8 fade-in">
+                            <div class="text-center">
+                                <svg class="w-20 h-20 mx-auto mb-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                <p class="text-2xl mb-3 opacity-90">Seu desempenho</p>
+                                <p class="text-8xl font-bold mb-6">${state.result.percentage}%</p>
+                                <div class="flex items-center justify-center gap-4 text-2xl">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="font-bold">${state.result.correct}</span>
+                                        <span class="opacity-90">acertos</span>
+                                    </div>
+                                    <div class="opacity-50">|</div>
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="font-bold">${state.result.wrong}</span>
+                                        <span class="opacity-90">erro${state.result.wrong !== 1 ? 's' : ''}</span>
+                                    </div>
+                                </div>
+                                <p class="text-lg opacity-80 mt-4">de ${state.result.total} questões</p>
+                            </div>
+                        </div>
+
+                        <!-- Performance by Topic -->
+                        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 fade-in">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                                </svg>
+                                Desempenho por Tema Principal
+                            </h2>
+                            <div class="space-y-5">
+                                ${Object.entries(state.result.topicScores).map(([topic, scores]) => {
+                                    const topicPercent = Math.round((scores.correct / scores.total) * 100);
+                                    const colorClass = topicPercent >= 70 ? 'from-green-500 to-green-600' : topicPercent >= 50 ? 'from-yellow-500 to-yellow-600' : 'from-red-500 to-red-600';
+                                    return `
+                                        <div class="bg-gray-50 rounded-xl p-5 border-2 border-gray-200">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <span class="font-bold text-lg text-gray-700">${topic}</span>
+                                                <span class="text-base text-gray-600 font-semibold bg-white px-4 py-2 rounded-lg">
+                                                    ${scores.correct}/${scores.total} (${topicPercent}%)
+                                                </span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                                <div class="bg-gradient-to-r ${colorClass} h-4 rounded-full progress-bar shadow-lg" style="width: ${topicPercent}%"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Performance by SUBTOPIC (Detailed) -->
+                        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 fade-in">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+                                <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                                </svg>
+                                Desempenho DETALHADO por Subtema
+                            </h2>
+                            <p class="text-gray-600 mb-6 text-lg">
+                                🎯 Análise específica de cada assunto para você focar seus estudos com precisão
+                            </p>
+                            <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                                ${Object.entries(state.result.subtopicScores).map(([key, scores]) => {
+                                    const subtopicPercent = Math.round((scores.correct / scores.total) * 100);
+                                    const colorClass = subtopicPercent >= 70 ? 'from-green-500 to-green-600' : subtopicPercent >= 50 ? 'from-yellow-500 to-yellow-600' : 'from-red-500 to-red-600';
+                                    const borderClass = subtopicPercent >= 70 ? 'border-green-500' : subtopicPercent >= 50 ? 'border-yellow-500' : 'border-red-500';
+                                    const bgClass = subtopicPercent >= 70 ? 'bg-green-50' : subtopicPercent >= 50 ? 'bg-yellow-50' : 'bg-red-50';
+                                    
+                                    return `
+                                        <div class="${bgClass} rounded-xl p-4 border-l-4 ${borderClass} hover:shadow-md transition-all">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        ${subtopicPercent >= 70 ? 
+                                                            '<svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>' :
+                                                            '<svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>'
+                                                        }
+                                                        <span class="text-sm text-gray-700 font-bold">${scores.tema}</span>
+                                                    </div>
+                                                    <span class="text-base font-bold text-gray-800">${scores.subtema}</span>
+                                                </div>
+                                                <span class="text-sm text-gray-700 whitespace-nowrap ml-3 font-bold bg-white px-3 py-1 rounded-lg">
+                                                    ${scores.correct}/${scores.total} (${subtopicPercent}%)
+                                                </span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r ${colorClass} h-3 rounded-full progress-bar" style="width: ${subtopicPercent}%"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        ${weakSubtopics.length > 0 ? `
+                            <div class="bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50 border-2 border-yellow-400 rounded-2xl p-8 mb-8 fade-in shadow-lg">
+                                <h3 class="font-bold text-2xl text-yellow-900 mb-4 flex items-center gap-3">
+                                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    Subtemas que Precisam de Mais Atenção
+                                </h3>
+                                <p class="text-yellow-800 text-lg mb-6">
+                                    📚 Foque seus estudos nos seguintes assuntos específicos para melhorar seu desempenho:
+                                </p>
+                                <div class="space-y-3">
+                                    ${weakSubtopics.map((st, idx) => `
+                                        <div class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-4">
+                                                    <span class="flex-shrink-0 w-10 h-10 rounded-full ${st.percentage < 50 ? 'bg-red-500' : 'bg-yellow-500'} text-white text-lg font-bold flex items-center justify-center shadow-lg">
+                                                        ${idx + 1}
+                                                    </span>
+                                                    <div>
+                                                        <span class="font-bold text-lg text-gray-800 block">${st.subtema}</span>
+                                                        <span class="text-sm text-gray-600">({st.tema})</span>
+                                                    </div>
+                                                </div>
+                                                <span class="text-2xl font-bold ${st.percentage < 50 ? 'text-red-600' : 'text-yellow-600'}">
+                                                    ${st.percentage}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="mt-6 p-4 bg-white/50 rounded-xl">
+                                    <p class="text-yellow-900 font-semibold flex items-center gap-2">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                                        </svg>
+                                        Revisar esses subtemas específicos pode aumentar significativamente sua nota!
+                                    </p>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Wrong Answers -->
+                        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 fade-in">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                                <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                Questões que Você Errou
+                            </h2>
+                            ${state.result.wrongQuestions.length === 0 ? `
+                                <div class="text-center py-12">
+                                    <svg class="w-24 h-24 text-green-500 mx-auto mb-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <p class="text-3xl font-bold text-green-600 mb-2">
+                                        🎉 Parabéns! Nota máxima!
+                                    </p>
+                                    <p class="text-xl text-gray-600">
+                                        Você acertou todas as questões!
+                                    </p>
+                                </div>
+                            ` : `
+                                <div class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                                    ${state.result.wrongQuestions.map(q => `
+                                        <div class="bg-red-50 border-2 border-red-200 rounded-xl p-5 hover:shadow-lg transition-all">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <span class="font-bold text-xl text-red-800">Questão ${q.num}</span>
+                                                <div class="text-right">
+                                                    <div class="text-sm text-gray-700 font-bold bg-white px-3 py-1 rounded mb-1">${q.tema}</div>
+                                                    <div class="text-sm text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded">${q.subtema}</div>
+                                                </div>
+                                            </div>
+                                            <p class="text-gray-800 mb-3 text-lg">
+                                                <span class="font-semibold">Sua resposta:</span> 
+                                                <span class="font-bold text-red-600 text-xl">${q.userAnswer}</span>
+                                                <span class="mx-3 text-gray-400">|</span>
+                                                <span class="font-semibold">Correta:</span> 
+                                                <span class="font-bold text-green-600 text-xl">${q.correctAnswer}</span>
+                                            </p>
+                                            <button class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-2 hover:underline">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                </svg>
+                                                Ver gabarito comentado
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-6 fade-in">
+                            <button
+                                onclick="goHome()"
+                                class="flex-1 px-8 py-5 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                            >
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                Voltar ao Início
+                            </button>
+                            <button
+                                onclick="resetExam()"
+                                class="flex-1 px-8 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-bold text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                            >
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Fazer Nova Tentativa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Inicializa a aplicação
+        window.onload = () => {
+            render();
+        };
+    </script>
+
+</body>
+</html>
