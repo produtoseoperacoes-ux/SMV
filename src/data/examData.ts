@@ -1,4 +1,10 @@
 import type { Answer, QuestionTopic, Exam } from '@/types/exam';
+import { SIMULADO_01_ANSWER_KEY, SIMULADO_01_TOPICS } from './simulado01Data';
+import { SIMULADO_02_ANSWER_KEY, SIMULADO_02_TOPICS } from './simulado02Data';
+import { SIMULADO_03_ANSWER_KEY, SIMULADO_03_TOPICS } from './simulado03Data';
+import { SIMULADO_04_ANSWER_KEY, SIMULADO_04_TOPICS } from './simulado04Data';
+import { SIMULADO_05_ANSWER_KEY, SIMULADO_05_TOPICS } from './simulado05Data';
+import { SIMULADO_06_ANSWER_KEY, SIMULADO_06_TOPICS } from './simulado06Data';
 import { SIMULADO_07_ANSWER_KEY, SIMULADO_07_TOPICS } from './simulado07Data';
 import { SIMULADO_08_ANSWER_KEY, SIMULADO_08_TOPICS } from './simulado08Data';
 import { PROVA_2023_ANSWER_KEY, PROVA_2023_TOPICS } from './prova2023Data';
@@ -14,6 +20,18 @@ export function getAnswerKeyByExamId(examId: string): { [key: number]: Answer } 
       return PROVA_2024_ANSWER_KEY;
     case 'smv-oficiais-2025':
       return PROVA_2025_ANSWER_KEY;
+    case 'simulado-01':
+      return SIMULADO_01_ANSWER_KEY;
+    case 'simulado-02':
+      return SIMULADO_02_ANSWER_KEY;
+    case 'simulado-03':
+      return SIMULADO_03_ANSWER_KEY;
+    case 'simulado-04':
+      return SIMULADO_04_ANSWER_KEY;
+    case 'simulado-05':
+      return SIMULADO_05_ANSWER_KEY;
+    case 'simulado-06':
+      return SIMULADO_06_ANSWER_KEY;
     case 'simulado-07':
       return SIMULADO_07_ANSWER_KEY;
     case 'simulado-08':
@@ -32,6 +50,18 @@ export function getTopicsByExamId(examId: string): { [key: number]: QuestionTopi
       return PROVA_2024_TOPICS;
     case 'smv-oficiais-2025':
       return PROVA_2025_TOPICS;
+    case 'simulado-01':
+      return SIMULADO_01_TOPICS;
+    case 'simulado-02':
+      return SIMULADO_02_TOPICS;
+    case 'simulado-03':
+      return SIMULADO_03_TOPICS;
+    case 'simulado-04':
+      return SIMULADO_04_TOPICS;
+    case 'simulado-05':
+      return SIMULADO_05_TOPICS;
+    case 'simulado-06':
+      return SIMULADO_06_TOPICS;
     case 'simulado-07':
       return SIMULADO_07_TOPICS;
     case 'simulado-08':
