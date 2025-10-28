@@ -61,21 +61,80 @@ export const QUESTION_TOPICS: { [key: number]: QuestionTopic } = {
   50: { tema: 'Português - Morfologia', subtema: 'Acentuação Gráfica' }
 };
 
-export const EXAMS: Exam[] = [
+// PROVAS OFICIAIS
+export const OFFICIAL_EXAMS: Exam[] = [
   {
-    id: 1,
-    title: 'Prova Petrobras 2023',
+    id: 'petrobras-2023',
+    title: 'Petrobras 2023',
     subject: 'Português',
     totalQuestions: 50,
     year: 2023,
-    description: 'Prova oficial com 50 questões de português'
+    banca: 'Cesgranrio',
+    description: 'Prova oficial Petrobras - Engenheiro de Produção',
+    difficulty: 'Difícil'
   },
   {
-    id: 2,
-    title: 'Simulado 01 - Português',
+    id: 'transpetro-2023',
+    title: 'Transpetro 2023',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2023,
+    banca: 'Cesgranrio',
+    description: 'Prova oficial Transpetro - Engenheiro Júnior',
+    difficulty: 'Média'
+  },
+  {
+    id: 'eletrobras-2022',
+    title: 'Eletrobras 2022',
+    subject: 'Português',
+    totalQuestions: 35,
+    year: 2022,
+    banca: 'Cesgranrio',
+    description: 'Prova oficial Eletrobras - Analista',
+    difficulty: 'Média'
+  }
+];
+
+// SIMULADOS
+export const PRACTICE_EXAMS: Exam[] = [
+  {
+    id: 'simulado-01',
+    title: 'Simulado Geral 01',
     subject: 'Português',
     totalQuestions: 40,
     year: 2025,
-    description: 'Simulado prático com questões selecionadas'
+    description: 'Questões de diversas bancas - Nível médio',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-02',
+    title: 'Simulado Intensivo 02',
+    subject: 'Português',
+    totalQuestions: 50,
+    year: 2025,
+    description: 'Questões avançadas de bancas federais',
+    difficulty: 'Difícil',
+    topics: 'Todos os temas'
+  },
+  {
+    id: 'simulado-03',
+    title: 'Simulado Morfologia',
+    subject: 'Português',
+    totalQuestions: 30,
+    year: 2025,
+    description: 'Focado em questões de morfologia',
+    difficulty: 'Fácil',
+    topics: 'Morfologia exclusivo'
+  },
+  {
+    id: 'simulado-04',
+    title: 'Simulado Sintaxe',
+    subject: 'Português',
+    totalQuestions: 30,
+    year: 2025,
+    description: 'Focado em questões de sintaxe',
+    difficulty: 'Média',
+    topics: 'Sintaxe exclusivo'
   }
 ];

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Home } from './Home';
 import { ExamView } from './ExamView';
 import { ResultView } from './ResultView';
-import { ANSWER_KEY, QUESTION_TOPICS } from '@/data/examData';
+import { ANSWER_KEY, QUESTION_TOPICS, OFFICIAL_EXAMS, PRACTICE_EXAMS } from '@/data/examData';
 import type { Exam, UserAnswers, Answer, ExamResult, SavedDraft } from '@/types/exam';
 
 type View = 'home' | 'exam' | 'result';
@@ -12,7 +12,7 @@ const Index = () => {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
   const [result, setResult] = useState<ExamResult | null>(null);
-  const [savedDrafts, setSavedDrafts] = useState<{ [examId: number]: SavedDraft }>({});
+  const [savedDrafts, setSavedDrafts] = useState<{ [examId: string]: SavedDraft }>({});
 
   const startExam = (exam: Exam) => {
     setSelectedExam(exam);

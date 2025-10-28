@@ -1,12 +1,15 @@
 export type Answer = 'A' | 'B' | 'C' | 'D' | 'E' | 'X';
 
 export interface Exam {
-  id: number;
+  id: string;
   title: string;
   subject: string;
   totalQuestions: number;
   year: number;
   description: string;
+  difficulty: 'Fácil' | 'Média' | 'Difícil';
+  banca?: string;
+  topics?: string;
 }
 
 export interface QuestionTopic {
@@ -50,4 +53,9 @@ export interface SavedDraft {
   answers: UserAnswers;
   date: string;
   count: number;
+}
+
+export interface ExamCategory {
+  official: Exam[];
+  practice: Exam[];
 }
