@@ -117,7 +117,7 @@ export const ExamView = ({
         </div>
 
         {/* Grid principal */}
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid lg:grid-cols-4 gap-6 pb-20">
           {/* Questões */}
           <div className="lg:col-span-3 space-y-4">
             {Array.from({ length: exam.totalQuestions }, (_, i) => i + 1).map((num) => (
@@ -134,6 +134,33 @@ export const ExamView = ({
           {/* Barra lateral de progresso */}
           <div className="lg:col-span-1">
             <ExamProgress answered={answeredCount} total={exam.totalQuestions} />
+          </div>
+        </div>
+
+        {/* Barra de ações fixa na parte inferior */}
+        <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border shadow-lg z-50">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+            <div className="text-sm font-medium text-muted-foreground">
+              {answeredCount} / {exam.totalQuestions}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleSaveDraft} variant="outline" size="sm">
+                <Save className="w-4 h-4 mr-2" />
+                Salvar
+              </Button>
+              <Button onClick={scrollToUnanswered} variant="outline" size="sm">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Próxima
+              </Button>
+              <Button 
+                onClick={handleFinish} 
+                className="bg-gradient-to-r from-success to-emerald-600 hover:opacity-90 text-white"
+                size="sm"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Finalizar
+              </Button>
+            </div>
           </div>
         </div>
       </div>
