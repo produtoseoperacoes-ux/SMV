@@ -102,7 +102,10 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
               {weakSubtopics.map((st) => (
                 <div key={st.key} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-foreground">{st.subtema}</span>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-foreground">{st.tema}</span>
+                      <span className="text-sm text-muted-foreground">{st.subtema}</span>
+                    </div>
                     <span className="text-lg font-bold text-foreground">{st.percentage}%</span>
                   </div>
                   <Progress value={st.percentage} className="h-3" />
