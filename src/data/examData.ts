@@ -17,6 +17,8 @@ import { SIMULADO_15_ANSWER_KEY, SIMULADO_15_TOPICS } from './simulado15Data';
 import { SIMULADO_16_ANSWER_KEY, SIMULADO_16_TOPICS } from './simulado16Data';
 import { SIMULADO_17_ANSWER_KEY, SIMULADO_17_TOPICS } from './simulado17Data';
 import { SIMULADO_18_ANSWER_KEY, SIMULADO_18_TOPICS } from './simulado18Data';
+import { SIMULADO_19_ANSWER_KEY, SIMULADO_19_TOPICS } from './simulado19Data';
+import { SIMULADO_20_ANSWER_KEY, SIMULADO_20_TOPICS } from './simulado20Data';
 import { PROVA_2023_ANSWER_KEY, PROVA_2023_TOPICS } from './prova2023Data';
 import { PROVA_2024_ANSWER_KEY, PROVA_2024_TOPICS } from './prova2024Data';
 import { PROVA_2025_ANSWER_KEY, PROVA_2025_TOPICS } from './prova2025Data';
@@ -66,6 +68,10 @@ export function getAnswerKeyByExamId(examId: string): { [key: number]: Answer } 
       return SIMULADO_17_ANSWER_KEY;
     case 'simulado-18':
       return SIMULADO_18_ANSWER_KEY;
+    case 'simulado-19':
+      return SIMULADO_19_ANSWER_KEY;
+    case 'simulado-20':
+      return SIMULADO_20_ANSWER_KEY;
     default:
       return null;
   }
@@ -116,6 +122,10 @@ export function getTopicsByExamId(examId: string): { [key: number]: QuestionTopi
       return SIMULADO_17_TOPICS;
     case 'simulado-18':
       return SIMULADO_18_TOPICS;
+    case 'simulado-19':
+      return SIMULADO_19_TOPICS;
+    case 'simulado-20':
+      return SIMULADO_20_TOPICS;
     default:
       return null;
   }
@@ -330,6 +340,26 @@ export const PRACTICE_EXAMS: Exam[] = [
   {
     id: 'simulado-18',
     title: 'Simulado 18 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-19',
+    title: 'Simulado 19 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-20',
+    title: 'Simulado 20 - Português SMV',
     subject: 'Português',
     totalQuestions: 40,
     year: 2025,
