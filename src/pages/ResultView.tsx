@@ -39,10 +39,10 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleSaveResult = async () => {
-    console.log('Iniciando geração de PDF...');
+    console.log('🔵 Iniciando geração de PDF...');
     
     if (!contentRef.current) {
-      console.error('contentRef.current não está disponível');
+      console.error('❌ contentRef.current não está disponível');
       toast({
         title: "Erro",
         description: "Não foi possível capturar o conteúdo. Tente novamente.",
@@ -52,13 +52,15 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
     }
     
     setIsGeneratingPDF(true);
+    console.log('🔵 Estado isGeneratingPDF definido como true');
+    
     toast({
       title: "Gerando PDF...",
       description: "Aguarde enquanto preparamos seu relatório.",
     });
 
     try {
-      console.log('Expandindo seções...');
+      console.log('🔵 Expandindo seções...');
       // Expandir todas as seções temporariamente
       const wasDetailsOpen = openDetails;
       const wasWrongQuestionsOpen = openWrongQuestions;
@@ -71,19 +73,33 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
       setOpenSubtopics(true);
 
       // Aguardar renderização
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('🔵 Aguardando 1.5s para renderização...');
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      console.log('Gerando canvas...');
+      console.log('🔵 Iniciando html2canvas...');
+      console.log('🔵 Dimensões do elemento:', {
+        width: contentRef.current.offsetWidth,
+        height: contentRef.current.offsetHeight,
+        scrollWidth: contentRef.current.scrollWidth,
+        scrollHeight: contentRef.current.scrollHeight
+      });
+      
       const canvas = await html2canvas(contentRef.current, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: true,
         backgroundColor: '#ffffff',
-        windowWidth: contentRef.current.scrollWidth,
-        windowHeight: contentRef.current.scrollHeight
+        width: contentRef.current.scrollWidth,
+        height: contentRef.current.scrollHeight
       });
 
-      console.log('Canvas gerado, criando PDF...');
+      console.log('✅ Canvas gerado com sucesso!', {
+        width: canvas.width,
+        height: canvas.height
+      });
+
+      console.log('🔵 Criando PDF...');
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -92,7 +108,8 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgData = canvas.toDataURL('image/png');
-
+      
+      console.log('🔵 Adicionando imagem ao PDF...');
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
@@ -103,9 +120,12 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
         heightLeft -= pageHeight;
       }
 
-      console.log('Salvando PDF...');
-      const fileName = `resultado-${exam.title.replace(/[^a-z0-9]/gi, '-')}-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+      console.log('🔵 Salvando PDF...');
+      const fileName = `resultado-${exam.title.replace(/[^a-z0-9]/gi, '-')}-${Date.now()}.pdf`;
+      console.log('🔵 Nome do arquivo:', fileName);
+      
       pdf.save(fileName);
+      console.log('✅ PDF.save() chamado com sucesso!');
 
       // Restaurar estado original
       setOpenDetails(wasDetailsOpen);
@@ -113,19 +133,21 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
       setOpenTopics(wasTopicsOpen);
       setOpenSubtopics(wasSubtopicsOpen);
 
-      console.log('PDF gerado com sucesso!');
+      console.log('✅ PDF gerado e salvo com sucesso!');
       toast({
         title: "PDF salvo!",
         description: "Seu resultado foi salvo em PDF com sucesso.",
       });
     } catch (error) {
-      console.error('Erro detalhado ao gerar PDF:', error);
+      console.error('❌ Erro detalhado ao gerar PDF:', error);
+      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'N/A');
       toast({
         title: "Erro ao gerar PDF",
         description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o PDF. Tente novamente.",
         variant: "destructive",
       });
     } finally {
+      console.log('🔵 Finalizando... definindo isGeneratingPDF como false');
       setIsGeneratingPDF(false);
     }
   };
