@@ -39,7 +39,17 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleSaveResult = async () => {
-    if (!contentRef.current) return;
+    console.log('Iniciando geração de PDF...');
+    
+    if (!contentRef.current) {
+      console.error('contentRef.current não está disponível');
+      toast({
+        title: "Erro",
+        description: "Não foi possível capturar o conteúdo. Tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsGeneratingPDF(true);
     toast({
@@ -48,6 +58,7 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
     });
 
     try {
+      console.log('Expandindo seções...');
       // Expandir todas as seções temporariamente
       const wasDetailsOpen = openDetails;
       const wasWrongQuestionsOpen = openWrongQuestions;
@@ -60,15 +71,19 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
       setOpenSubtopics(true);
 
       // Aguardar renderização
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
+      console.log('Gerando canvas...');
       const canvas = await html2canvas(contentRef.current, {
         scale: 2,
         useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
+        logging: true,
+        backgroundColor: '#ffffff',
+        windowWidth: contentRef.current.scrollWidth,
+        windowHeight: contentRef.current.scrollHeight
       });
 
+      console.log('Canvas gerado, criando PDF...');
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -88,7 +103,9 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`resultado-${exam.title}-${new Date().toLocaleDateString('pt-BR')}.pdf`);
+      console.log('Salvando PDF...');
+      const fileName = `resultado-${exam.title.replace(/[^a-z0-9]/gi, '-')}-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+      pdf.save(fileName);
 
       // Restaurar estado original
       setOpenDetails(wasDetailsOpen);
@@ -96,15 +113,16 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
       setOpenTopics(wasTopicsOpen);
       setOpenSubtopics(wasSubtopicsOpen);
 
+      console.log('PDF gerado com sucesso!');
       toast({
         title: "PDF salvo!",
         description: "Seu resultado foi salvo em PDF com sucesso.",
       });
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
+      console.error('Erro detalhado ao gerar PDF:', error);
       toast({
         title: "Erro ao gerar PDF",
-        description: "Ocorreu um erro ao gerar o PDF. Tente novamente.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o PDF. Tente novamente.",
         variant: "destructive",
       });
     } finally {
