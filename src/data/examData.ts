@@ -7,6 +7,16 @@ import { SIMULADO_05_ANSWER_KEY, SIMULADO_05_TOPICS } from './simulado05Data';
 import { SIMULADO_06_ANSWER_KEY, SIMULADO_06_TOPICS } from './simulado06Data';
 import { SIMULADO_07_ANSWER_KEY, SIMULADO_07_TOPICS } from './simulado07Data';
 import { SIMULADO_08_ANSWER_KEY, SIMULADO_08_TOPICS } from './simulado08Data';
+import { SIMULADO_09_ANSWER_KEY, SIMULADO_09_TOPICS } from './simulado09Data';
+import { SIMULADO_10_ANSWER_KEY, SIMULADO_10_TOPICS } from './simulado10Data';
+import { SIMULADO_11_ANSWER_KEY, SIMULADO_11_TOPICS } from './simulado11Data';
+import { SIMULADO_12_ANSWER_KEY, SIMULADO_12_TOPICS } from './simulado12Data';
+import { SIMULADO_13_ANSWER_KEY, SIMULADO_13_TOPICS } from './simulado13Data';
+import { SIMULADO_14_ANSWER_KEY, SIMULADO_14_TOPICS } from './simulado14Data';
+import { SIMULADO_15_ANSWER_KEY, SIMULADO_15_TOPICS } from './simulado15Data';
+import { SIMULADO_16_ANSWER_KEY, SIMULADO_16_TOPICS } from './simulado16Data';
+import { SIMULADO_17_ANSWER_KEY, SIMULADO_17_TOPICS } from './simulado17Data';
+import { SIMULADO_18_ANSWER_KEY, SIMULADO_18_TOPICS } from './simulado18Data';
 import { PROVA_2023_ANSWER_KEY, PROVA_2023_TOPICS } from './prova2023Data';
 import { PROVA_2024_ANSWER_KEY, PROVA_2024_TOPICS } from './prova2024Data';
 import { PROVA_2025_ANSWER_KEY, PROVA_2025_TOPICS } from './prova2025Data';
@@ -36,6 +46,26 @@ export function getAnswerKeyByExamId(examId: string): { [key: number]: Answer } 
       return SIMULADO_07_ANSWER_KEY;
     case 'simulado-08':
       return SIMULADO_08_ANSWER_KEY;
+    case 'simulado-09':
+      return SIMULADO_09_ANSWER_KEY;
+    case 'simulado-10':
+      return SIMULADO_10_ANSWER_KEY;
+    case 'simulado-11':
+      return SIMULADO_11_ANSWER_KEY;
+    case 'simulado-12':
+      return SIMULADO_12_ANSWER_KEY;
+    case 'simulado-13':
+      return SIMULADO_13_ANSWER_KEY;
+    case 'simulado-14':
+      return SIMULADO_14_ANSWER_KEY;
+    case 'simulado-15':
+      return SIMULADO_15_ANSWER_KEY;
+    case 'simulado-16':
+      return SIMULADO_16_ANSWER_KEY;
+    case 'simulado-17':
+      return SIMULADO_17_ANSWER_KEY;
+    case 'simulado-18':
+      return SIMULADO_18_ANSWER_KEY;
     default:
       return null;
   }
@@ -66,6 +96,26 @@ export function getTopicsByExamId(examId: string): { [key: number]: QuestionTopi
       return SIMULADO_07_TOPICS;
     case 'simulado-08':
       return SIMULADO_08_TOPICS;
+    case 'simulado-09':
+      return SIMULADO_09_TOPICS;
+    case 'simulado-10':
+      return SIMULADO_10_TOPICS;
+    case 'simulado-11':
+      return SIMULADO_11_TOPICS;
+    case 'simulado-12':
+      return SIMULADO_12_TOPICS;
+    case 'simulado-13':
+      return SIMULADO_13_TOPICS;
+    case 'simulado-14':
+      return SIMULADO_14_TOPICS;
+    case 'simulado-15':
+      return SIMULADO_15_TOPICS;
+    case 'simulado-16':
+      return SIMULADO_16_TOPICS;
+    case 'simulado-17':
+      return SIMULADO_17_TOPICS;
+    case 'simulado-18':
+      return SIMULADO_18_TOPICS;
     default:
       return null;
   }
@@ -184,6 +234,106 @@ export const PRACTICE_EXAMS: Exam[] = [
     totalQuestions: 40,
     year: 2025,
     description: 'Simulado completo com ênfase em ética e linguagem',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-09',
+    title: 'Simulado 09 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-10',
+    title: 'Simulado 10 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-11',
+    title: 'Simulado 11 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-12',
+    title: 'Simulado 12 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-13',
+    title: 'Simulado 13 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-14',
+    title: 'Simulado 14 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-15',
+    title: 'Simulado 15 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-16',
+    title: 'Simulado 16 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-17',
+    title: 'Simulado 17 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
+    difficulty: 'Média',
+    topics: 'Morfologia, Sintaxe e Interpretação'
+  },
+  {
+    id: 'simulado-18',
+    title: 'Simulado 18 - Português SMV',
+    subject: 'Português',
+    totalQuestions: 40,
+    year: 2025,
+    description: 'Questões de diversas bancas - Nível médio/avançado',
     difficulty: 'Média',
     topics: 'Morfologia, Sintaxe e Interpretação'
   }
