@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
-import { Home, RotateCcw, ChevronDown, ChevronUp, List, BarChart } from 'lucide-react';
+import { Home, RotateCcw, ChevronDown, ChevronUp, List, BarChart, Save } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import type { ExamResult, Exam } from '@/types/exam';
 
 interface WeakSubtopic {
@@ -27,10 +28,28 @@ interface ResultViewProps {
 }
 
 export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps) => {
+  const { toast } = useToast();
   const [openDetails, setOpenDetails] = useState(false);
   const [openWrongQuestions, setOpenWrongQuestions] = useState(false);
   const [openTopics, setOpenTopics] = useState(false);
   const [openSubtopics, setOpenSubtopics] = useState(false);
+
+  const handleSaveResult = () => {
+    const savedResults = JSON.parse(localStorage.getItem('examResults') || '[]');
+    const newResult = {
+      examId: exam.id,
+      examTitle: exam.title,
+      date: new Date().toISOString(),
+      result
+    };
+    savedResults.push(newResult);
+    localStorage.setItem('examResults', JSON.stringify(savedResults));
+    
+    toast({
+      title: "Resultado salvo!",
+      description: "Seu resultado foi salvo com sucesso.",
+    });
+  };
 
   // Calcular os 5 subtemas com pior desempenho
   const weakSubtopics: WeakSubtopic[] = Object.entries(result.subtopicScores)
@@ -89,6 +108,10 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
           <Button onClick={onReset} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <RotateCcw className="w-4 h-4 mr-2" />
             Refazer
+          </Button>
+          <Button onClick={handleSaveResult} variant="outline">
+            <Save className="w-4 h-4 mr-2" />
+            Salvar
           </Button>
         </div>
 
