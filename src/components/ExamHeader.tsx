@@ -10,10 +10,10 @@ export const ExamHeader = () => {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
-              Sistema de Provas
+              Controle de Desempenho
             </h1>
             <p className="text-white/90 mt-1 text-sm sm:text-base">
-              Classificação detalhada por <strong>tema e subtema</strong>
+              Provas e Simulados - Classificação por <strong>tema e subtema</strong>
             </p>
           </div>
         </div>
