@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ExamHeader } from '@/components/ExamHeader';
 import { TopicAnalysis } from '@/components/TopicAnalysis';
 import { SubtopicAnalysis } from '@/components/SubtopicAnalysis';
@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
-import { Home, RotateCcw, ChevronDown, ChevronUp, List, BarChart, Save } from 'lucide-react';
+import { Home, RotateCcw, ChevronDown, ChevronUp, List, BarChart, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import type { ExamResult, Exam } from '@/types/exam';
 
 interface WeakSubtopic {
@@ -29,26 +31,85 @@ interface ResultViewProps {
 
 export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps) => {
   const { toast } = useToast();
+  const contentRef = useRef<HTMLDivElement>(null);
   const [openDetails, setOpenDetails] = useState(false);
   const [openWrongQuestions, setOpenWrongQuestions] = useState(false);
   const [openTopics, setOpenTopics] = useState(false);
   const [openSubtopics, setOpenSubtopics] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  const handleSaveResult = () => {
-    const savedResults = JSON.parse(localStorage.getItem('examResults') || '[]');
-    const newResult = {
-      examId: exam.id,
-      examTitle: exam.title,
-      date: new Date().toISOString(),
-      result
-    };
-    savedResults.push(newResult);
-    localStorage.setItem('examResults', JSON.stringify(savedResults));
+  const handleSaveResult = async () => {
+    if (!contentRef.current) return;
     
+    setIsGeneratingPDF(true);
     toast({
-      title: "Resultado salvo!",
-      description: "Seu resultado foi salvo com sucesso.",
+      title: "Gerando PDF...",
+      description: "Aguarde enquanto preparamos seu relatório.",
     });
+
+    try {
+      // Expandir todas as seções temporariamente
+      const wasDetailsOpen = openDetails;
+      const wasWrongQuestionsOpen = openWrongQuestions;
+      const wasTopicsOpen = openTopics;
+      const wasSubtopicsOpen = openSubtopics;
+      
+      setOpenDetails(true);
+      setOpenWrongQuestions(true);
+      setOpenTopics(true);
+      setOpenSubtopics(true);
+
+      // Aguardar renderização
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`resultado-${exam.title}-${new Date().toLocaleDateString('pt-BR')}.pdf`);
+
+      // Restaurar estado original
+      setOpenDetails(wasDetailsOpen);
+      setOpenWrongQuestions(wasWrongQuestionsOpen);
+      setOpenTopics(wasTopicsOpen);
+      setOpenSubtopics(wasSubtopicsOpen);
+
+      toast({
+        title: "PDF salvo!",
+        description: "Seu resultado foi salvo em PDF com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o PDF. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   // Calcular os 5 subtemas com pior desempenho
@@ -69,7 +130,7 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
     <div className="min-h-screen bg-background">
       <ExamHeader />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div ref={contentRef} className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Header Principal - Acertos */}
         <Card className="mb-8 shadow-lg">
           <CardContent className="p-8">
@@ -109,9 +170,9 @@ export const ResultView = ({ exam, result, onReset, onGoHome }: ResultViewProps)
             <RotateCcw className="w-4 h-4 mr-2" />
             Refazer
           </Button>
-          <Button onClick={handleSaveResult} variant="outline">
-            <Save className="w-4 h-4 mr-2" />
-            Salvar
+          <Button onClick={handleSaveResult} variant="outline" disabled={isGeneratingPDF}>
+            <FileDown className="w-4 h-4 mr-2" />
+            {isGeneratingPDF ? 'Gerando...' : 'Salvar PDF'}
           </Button>
         </div>
 
